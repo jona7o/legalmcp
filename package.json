@@ -1,0 +1,26 @@
+{
+  "name": "legalmcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Legal MCP Server - Semantic search for German and EU law",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourorg/legalmcp"
+  },
+  "scripts": {
+    "dev": "pnpm --filter frontend dev",
+    "build": "pnpm --filter frontend build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "crawler:run": "docker-compose run --rm crawler",
+    "db:migrate": "cd packages/mcp-server && alembic upgrade head"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

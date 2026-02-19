@@ -1,0 +1,107 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/mcp-server/**'
+      - 'packages/crawler/**'
+  workflow_dispatch:
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_REGION: europe-west3
+  
+jobs:
+  deploy-mcp-server:
+    name: Deploy MCP Server to Cloud Run
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker
+      
+      - name: Build and Push MCP Server
+        working-directory: packages/mcp-server
+        run: |
+          docker build -t gcr.io/$GCP_PROJECT_ID/legalmcp-mcp-server:$GITHUB_SHA .
+          docker push gcr.io/$GCP_PROJECT_ID/legalmcp-mcp-server:$GITHUB_SHA
+      
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy legalmcp-mcp-server \
+            --image gcr.io/$GCP_PROJECT_ID/legalmcp-mcp-server:$GITHUB_SHA \
+            --platform managed \
+            --region $GCP_REGION \
+            --allow-unauthenticated \
+            --set-env-vars "POSTGRES_HOST=${{ secrets.CLOUD_SQL_CONNECTION_NAME }}" \
+            --set-env-vars "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" \
+            --set-env-vars "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" \
+            --set-secrets "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD_SECRET }}" \
+            --memory 2Gi \
+            --cpu 2 \
+            --max-instances 10
+      
+      - name: Get Service URL
+        run: |
+          gcloud run services describe legalmcp-mcp-server \
+            --platform managed \
+            --region $GCP_REGION \
+            --format 'value(status.url)'
+
+  deploy-crawler:
+    name: Deploy Crawler to Cloud Run Jobs
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker
+      
+      - name: Build and Push Crawler
+        working-directory: packages/crawler
+        run: |
+          docker build -t gcr.io/$GCP_PROJECT_ID/legalmcp-crawler:$GITHUB_SHA .
+          docker push gcr.io/$GCP_PROJECT_ID/legalmcp-crawler:$GITHUB_SHA
+      
+      - name: Update Cloud Run Job
+        run: |
+          gcloud run jobs update legalmcp-crawler \
+            --image gcr.io/$GCP_PROJECT_ID/legalmcp-crawler:$GITHUB_SHA \
+            --region $GCP_REGION \
+            --set-env-vars "POSTGRES_HOST=${{ secrets.CLOUD_SQL_CONNECTION_NAME }}" \
+            --set-env-vars "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" \
+            --set-env-vars "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" \
+            --set-secrets "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD_SECRET }}" \
+            --memory 4Gi \
+            --cpu 2 \
+            --task-timeout 3600s \
+            || gcloud run jobs create legalmcp-crawler \
+                --image gcr.io/$GCP_PROJECT_ID/legalmcp-crawler:$GITHUB_SHA \
+                --region $GCP_REGION \
+                --set-env-vars "POSTGRES_HOST=${{ secrets.CLOUD_SQL_CONNECTION_NAME }}" \
+                --set-env-vars "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" \
+                --set-env-vars "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" \
+                --set-secrets "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD_SECRET }}" \
+                --memory 4Gi \
+                --cpu 2 \
+                --task-timeout 3600s

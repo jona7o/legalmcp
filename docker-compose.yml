@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: legalmcp-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-legalmcp}
+      POSTGRES_USER: ${POSTGRES_USER:-legal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-legal_dev_password}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./packages/mcp-server/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-legal}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - legalmcp-network
+
+  mcp-server:
+    build:
+      context: ./packages/mcp-server
+      dockerfile: Dockerfile
+    container_name: legalmcp-mcp-server
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-legalmcp}
+      POSTGRES_USER: ${POSTGRES_USER:-legal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-legal_dev_password}
+      MCP_SERVER_PORT: 8000
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # GOOGLE_API_KEY: ${GOOGLE_API_KEY}  # Disabled - using service account instead
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-innfactory-ai-consulting}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-pro}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./packages/mcp-server/src:/app/src
+      - model-cache:/app/models
+      - ./innfactory-ai-consulting-ed5ef0e1e89e.json:/app/service-account.json:ro
+    networks:
+      - legalmcp-network
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+  crawler:
+    build:
+      context: ./packages/crawler
+      dockerfile: Dockerfile
+    container_name: legalmcp-crawler
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-legalmcp}
+      POSTGRES_USER: ${POSTGRES_USER:-legal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-legal_dev_password}
+      CRAWLER_RATE_LIMIT: ${CRAWLER_RATE_LIMIT:-1.0}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mcp-server:
+        condition: service_started
+    volumes:
+      - ./packages/crawler/src:/app/src
+      - crawler-cache:/app/cache
+    networks:
+      - legalmcp-network
+    profiles:
+      - crawler
+    command: python -m src.main
+
+  frontend:
+    build:
+      context: ./packages/frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: legalmcp-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_MCP_URL: http://localhost:8000/mcp
+      NEXT_PUBLIC_ENABLE_CHAT: "true"
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mcp-server
+    volumes:
+      - ./packages/frontend/src:/app/src
+      - ./packages/frontend/public:/app/public
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - legalmcp-network
+    command: pnpm dev
+
+volumes:
+  postgres-data:
+  model-cache:
+  crawler-cache:
+
+networks:
+  legalmcp-network:
+    driver: bridge
