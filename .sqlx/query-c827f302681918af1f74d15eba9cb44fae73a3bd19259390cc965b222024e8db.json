@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO sources (name, jurisdiction, language, base_url, crawler_type, cron_schedule)\n        VALUES ('Manual Uploads', 'UPLOAD', 'und', '', 'manual', '0 0 * * *')\n        ON CONFLICT (name) DO NOTHING\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "c827f302681918af1f74d15eba9cb44fae73a3bd19259390cc965b222024e8db"
+}

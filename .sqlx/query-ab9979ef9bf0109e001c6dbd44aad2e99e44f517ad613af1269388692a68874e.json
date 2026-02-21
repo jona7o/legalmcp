@@ -1,0 +1,80 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT id, name, jurisdiction, language, base_url, crawler_type,\n                   cron_schedule, config_json, enabled, created_at, updated_at\n            FROM sources\n            ORDER BY name\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "jurisdiction",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "language",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "base_url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "crawler_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "cron_schedule",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "config_json",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 8,
+        "name": "enabled",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ab9979ef9bf0109e001c6dbd44aad2e99e44f517ad613af1269388692a68874e"
+}

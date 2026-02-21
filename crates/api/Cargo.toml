@@ -1,0 +1,63 @@
+[package]
+name = "api"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "api-service"
+path = "src/main.rs"
+
+[lib]
+name = "api"
+path = "src/lib.rs"
+
+[dependencies]
+dotenvy = { workspace = true }
+legal-core = { workspace = true }
+embeddings = { workspace = true }
+ingest = { workspace = true }
+sqlx = { workspace = true }
+pgvector = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+axum = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+governor = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+anyhow = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+bytes = { workspace = true }
+futures = { workspace = true }
+object_store = { workspace = true }
+
+# API key generation
+rand = { version = "0.8" }
+
+# Constant-time comparison for auth
+subtle = { version = "2" }
+
+# MCP server
+rmcp = { version = "0.16", features = [
+    "server",
+    "macros",
+    "schemars",
+    "transport-streamable-http-server",
+] }
+schemars = { version = "0.8" }
+
+[dev-dependencies]
+tokio = { workspace = true }
+wiremock = { workspace = true }
+# Integration test helpers
+http-body-util = "0.1"
+tower = { workspace = true, features = ["util"] }
+dotenvy = { workspace = true }

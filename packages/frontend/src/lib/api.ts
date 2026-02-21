@@ -1,132 +1,129 @@
-import type { 
-  SearchResult, 
-  SearchParams, 
-  LawDocument, 
-  CaseDocument, 
-  Change,
+import type {
+  SearchParams,
+  SearchResponse,
+  Document,
+  DocumentVersion,
+  Source,
+  ChangesParams,
+  ChangesResponse,
+  ApiError,
   ChatRequest,
   ChatResponse,
-  ApiError 
 } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-class ApiClient {
-  private baseUrl: string;
+// ─── RFC 7807 error parsing ───────────────────────────────────────────────────
 
-  constructor(baseUrl: string = API_BASE_URL) {
-    this.baseUrl = baseUrl;
-  }
-
-  private async request<T>(
-    endpoint: string,
-    options?: RequestInit
-  ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
-    
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          ...options?.headers,
-        },
-      });
-
-      if (!response.ok) {
-        const error: ApiError = {
-          error: response.statusText,
-          status: response.status,
-        };
-        
-        try {
-          const errorData = await response.json();
-          error.details = errorData.detail || errorData.message;
-        } catch {
-          // Ignore JSON parse errors
-        }
-        
-        throw error;
-      }
-
-      return await response.json();
-    } catch (error) {
-      if ((error as ApiError).status) {
-        throw error;
-      }
-      
-      throw {
-        error: 'Netzwerkfehler',
-        details: 'Die Verbindung zum Server konnte nicht hergestellt werden.',
-        status: 0,
-      } as ApiError;
-    }
-  }
-
-  async search(params: SearchParams): Promise<SearchResult[]> {
-    // Backend erwartet POST /api/search mit JSON body
-    const requestBody = {
-      query: params.query,
-      limit: params.limit || 10,
-      min_score: 0.7,
+async function parseErrorResponse(response: Response): Promise<ApiError> {
+  const base: ApiError = { status: response.status };
+  try {
+    const body = await response.json();
+    return {
+      ...base,
+      type: body.type,
+      title: body.title,
+      detail: body.detail,
+      // legacy compat
+      error: body.title || response.statusText,
+      details: body.detail,
     };
-    
-    // Optional parameters
-    if (params.jurisdictions?.length) {
-      Object.assign(requestBody, { jurisdiction: params.jurisdictions });
-    }
-    
-    if (params.includeCases !== undefined) {
-      Object.assign(requestBody, { include_case_law: params.includeCases });
-    }
-    
-    if (params.documentType) {
-      Object.assign(requestBody, { document_type: [params.documentType] });
-    }
-
-    return this.request<SearchResult[]>(`/api/search`, {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-    });
-  }
-
-  async getLaw(id: string): Promise<LawDocument> {
-    return this.request<LawDocument>(`/api/laws/${id}`);
-  }
-
-  async getCase(id: string): Promise<CaseDocument> {
-    return this.request<CaseDocument>(`/api/case-law/${id}`);
-  }
-
-  async getChanges(params?: { 
-    jurisdiction?: string; 
-    since?: string;
-    limit?: number;
-  }): Promise<Change[]> {
-    const queryParams = new URLSearchParams();
-    
-    if (params?.jurisdiction) {
-      queryParams.append('jurisdiction', params.jurisdiction);
-    }
-    
-    if (params?.since) {
-      queryParams.append('since_days', params.since);
-    }
-    
-    if (params?.limit) {
-      queryParams.append('limit', String(params.limit));
-    }
-
-    const query = queryParams.toString();
-    return this.request<Change[]>(`/api/changes${query ? `?${query}` : ''}`);
-  }
-
-  async chat(request: ChatRequest): Promise<ChatResponse> {
-    return this.request<ChatResponse>(`/api/chat`, {
-      method: 'POST',
-      body: JSON.stringify(request),
-    });
+  } catch {
+    return { ...base, error: response.statusText };
   }
 }
 
-export const apiClient = new ApiClient();
+// ─── Core fetch wrapper ───────────────────────────────────────────────────────
+
+async function apiFetch<T>(
+  path: string,
+  options?: RequestInit
+): Promise<T> {
+  const url = `${API_BASE_URL}${path}`;
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+    });
+  } catch {
+    const err: ApiError = {
+      status: 0,
+      error: 'Network error',
+      details: 'Could not connect to the server.',
+    };
+    throw err;
+  }
+
+  if (!response.ok) {
+    throw await parseErrorResponse(response);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+// ─── Search ───────────────────────────────────────────────────────────────────
+
+export async function searchLaws(params: SearchParams): Promise<SearchResponse> {
+  const query = new URLSearchParams({ q: params.q });
+
+  if (params.jurisdiction) query.set('jurisdiction', params.jurisdiction);
+  if (params.doc_type) query.set('doc_type', params.doc_type);
+  if (params.language) query.set('language', params.language);
+  if (params.limit != null) query.set('limit', String(params.limit));
+  if (params.offset != null) query.set('offset', String(params.offset));
+
+  return apiFetch<SearchResponse>(`/api/v1/search?${query.toString()}`);
+}
+
+// ─── Documents ────────────────────────────────────────────────────────────────
+
+export async function getDocument(id: string): Promise<Document> {
+  return apiFetch<Document>(`/api/v1/documents/${encodeURIComponent(id)}`);
+}
+
+export async function getDocumentVersions(id: string): Promise<DocumentVersion[]> {
+  return apiFetch<DocumentVersion[]>(
+    `/api/v1/documents/${encodeURIComponent(id)}/versions`
+  );
+}
+
+// ─── Sources ─────────────────────────────────────────────────────────────────
+
+export async function getSources(jurisdiction?: string): Promise<Source[]> {
+  const query = jurisdiction
+    ? `?jurisdiction=${encodeURIComponent(jurisdiction)}`
+    : '';
+  return apiFetch<Source[]>(`/api/v1/sources${query}`);
+}
+
+// ─── Changes ─────────────────────────────────────────────────────────────────
+
+export async function getChanges(params: ChangesParams): Promise<ChangesResponse> {
+  const query = new URLSearchParams();
+
+  if (params.since) query.set('since', params.since);
+  if (params.jurisdiction) query.set('jurisdiction', params.jurisdiction);
+  if (params.limit != null) query.set('limit', String(params.limit));
+  if (params.offset != null) query.set('offset', String(params.offset));
+
+  const qs = query.toString();
+  return apiFetch<ChangesResponse>(`/api/v1/changes${qs ? `?${qs}` : ''}`);
+}
+
+// ─── Legacy export kept for chat page (endpoint deferred) ────────────────────
+
+export const apiClient = {
+  /** @deprecated use named functions instead */
+  async chat(request: ChatRequest): Promise<ChatResponse> {
+    return apiFetch<ChatResponse>('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  },
+};

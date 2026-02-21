@@ -1,0 +1,36 @@
+[package]
+name = "ingest"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+legal-core = { workspace = true }
+embeddings = { workspace = true }
+sqlx = { workspace = true }
+pgvector = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+reqwest = { workspace = true }
+scraper = { workspace = true }
+htmd = { workspace = true }
+quick-xml = { workspace = true }
+text-splitter = { workspace = true }
+tiktoken-rs = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+base64 = { workspace = true }
+object_store = { workspace = true }
+bytes = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+futures = { workspace = true }
+anyhow = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }
+wiremock = { workspace = true }

@@ -1,18 +1,17 @@
-version: '3.8'
-
 services:
   postgres:
-    image: pgvector/pgvector:pg15
+    image: pgvector/pgvector:pg16
     container_name: legalmcp-postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-legalmcp}
       POSTGRES_USER: ${POSTGRES_USER:-legal}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-legal_dev_password}
     ports:
+      # External 5433 avoids conflict with a local postgres instance.
+      # All inter-container connections use the internal port 5432.
       - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./packages/mcp-server/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-legal}"]
       interval: 10s
@@ -21,90 +20,89 @@ services:
     networks:
       - legalmcp-network
 
-  mcp-server:
+  api-service:
     build:
-      context: ./packages/mcp-server
-      dockerfile: Dockerfile
-    container_name: legalmcp-mcp-server
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: legalmcp-api
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: ${POSTGRES_DB:-legalmcp}
-      POSTGRES_USER: ${POSTGRES_USER:-legal}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-legal_dev_password}
-      MCP_SERVER_PORT: 8000
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      # GOOGLE_API_KEY: ${GOOGLE_API_KEY}  # Disabled - using service account instead
-      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-innfactory-ai-consulting}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-pro}
+      DATABASE_URL: postgres://${POSTGRES_USER:-legal}:${POSTGRES_PASSWORD:-legal_dev_password}@postgres:5432/${POSTGRES_DB:-legalmcp}
+      VERTEX_AI_PROJECT: ${VERTEX_AI_PROJECT:-}
+      VERTEX_AI_LOCATION: ${VERTEX_AI_LOCATION:-europe-west3}
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS:-}
+      OBJECT_STORE_TYPE: ${OBJECT_STORE_TYPE:-memory}
+      API_PORT: ${API_PORT:-8000}
+      RUST_LOG: ${RUST_LOG:-info}
     ports:
       - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./packages/mcp-server/src:/app/src
-      - model-cache:/app/models
-      - ./innfactory-ai-consulting-ed5ef0e1e89e.json:/app/service-account.json:ro
     networks:
       - legalmcp-network
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
-  crawler:
+  crawler-service:
     build:
-      context: ./packages/crawler
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.crawler
     container_name: legalmcp-crawler
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: ${POSTGRES_DB:-legalmcp}
-      POSTGRES_USER: ${POSTGRES_USER:-legal}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-legal_dev_password}
-      CRAWLER_RATE_LIMIT: ${CRAWLER_RATE_LIMIT:-1.0}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgres://${POSTGRES_USER:-legal}:${POSTGRES_PASSWORD:-legal_dev_password}@postgres:5432/${POSTGRES_DB:-legalmcp}
+      VERTEX_AI_PROJECT: ${VERTEX_AI_PROJECT:-}
+      VERTEX_AI_LOCATION: ${VERTEX_AI_LOCATION:-europe-west3}
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS:-}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+      OBJECT_STORE_TYPE: ${OBJECT_STORE_TYPE:-memory}
+      GCS_BUCKET: ${GCS_BUCKET:-}
+      AZURE_STORAGE_ACCOUNT: ${AZURE_STORAGE_ACCOUNT:-}
+      AZURE_STORAGE_KEY: ${AZURE_STORAGE_KEY:-}
+      AZURE_CONTAINER: ${AZURE_CONTAINER:-}
+      RUST_LOG: ${RUST_LOG:-info}
     depends_on:
       postgres:
         condition: service_healthy
-      mcp-server:
+      api-service:
         condition: service_started
-    volumes:
-      - ./packages/crawler/src:/app/src
-      - crawler-cache:/app/cache
     networks:
       - legalmcp-network
-    profiles:
-      - crawler
-    command: python -m src.main
+
+  seed-sources:
+    build:
+      context: .
+      dockerfile: Dockerfile.crawler
+    container_name: legalmcp-seed
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-legal}:${POSTGRES_PASSWORD:-legal_dev_password}@postgres:5432/${POSTGRES_DB:-legalmcp}
+      RUST_LOG: ${RUST_LOG:-info}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - legalmcp-network
+    # Overrides the default CMD to run the seed-sources binary instead.
+    # restart: no ensures it runs once and exits (idempotent by design).
+    command: ["/app/seed-sources"]
+    restart: "no"
 
   frontend:
     build:
-      context: ./packages/frontend
+      context: packages/frontend
       dockerfile: Dockerfile
-      target: development
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api-service:8000}
     container_name: legalmcp-frontend
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000
-      NEXT_PUBLIC_MCP_URL: http://localhost:8000/mcp
-      NEXT_PUBLIC_ENABLE_CHAT: "true"
-      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api-service:8000}
+      NEXT_PUBLIC_MCP_URL: ${NEXT_PUBLIC_MCP_URL:-http://api-service:8000/mcp}
     ports:
       - "3000:3000"
     depends_on:
-      - mcp-server
-    volumes:
-      - ./packages/frontend/src:/app/src
-      - ./packages/frontend/public:/app/public
-      - /app/node_modules
-      - /app/.next
+      - api-service
     networks:
       - legalmcp-network
-    command: pnpm dev
 
 volumes:
   postgres-data:
-  model-cache:
-  crawler-cache:
 
 networks:
   legalmcp-network:

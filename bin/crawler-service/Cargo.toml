@@ -1,0 +1,28 @@
+[package]
+name = "crawler-service"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "crawler-service"
+path = "src/main.rs"
+
+[dependencies]
+legal-core = { workspace = true }
+crawler = { workspace = true }
+ingest = { workspace = true }
+embeddings = { workspace = true }
+sqlx = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tokio = { workspace = true }
+apalis = { workspace = true }
+apalis-sql = { workspace = true }
+tokio-cron-scheduler = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+anyhow = { workspace = true }
+dotenvy = { workspace = true }

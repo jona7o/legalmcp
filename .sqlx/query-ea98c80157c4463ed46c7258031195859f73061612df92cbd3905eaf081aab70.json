@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO crawl_runs (source_id, status, docs_new, docs_updated, docs_unchanged)\n        VALUES ($1, 'queued', 0, 0, 0)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ea98c80157c4463ed46c7258031195859f73061612df92cbd3905eaf081aab70"
+}

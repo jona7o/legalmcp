@@ -1,0 +1,20 @@
+[package]
+name = "embeddings"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+legal-core = { workspace = true }
+pgvector = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true }
+async-trait = { workspace = true }
+reqwest = { workspace = true }
+anyhow = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }

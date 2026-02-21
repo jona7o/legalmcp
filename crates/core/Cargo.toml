@@ -1,0 +1,28 @@
+[package]
+name = "legal-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "legal_core"
+doctest = false
+
+[dependencies]
+sqlx = { workspace = true }
+pgvector = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+config = { workspace = true }
+dotenvy = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+tokio = { workspace = true }
+axum = { workspace = true }
+anyhow = { workspace = true }
+object_store = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -12,6 +13,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ onSearch, isLoading, defaultValue = '' }: SearchBarProps) {
+  const t = useTranslations('search');
   const [query, setQuery] = useState(defaultValue);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -27,7 +29,7 @@ export function SearchBar({ onSearch, isLoading, defaultValue = '' }: SearchBarP
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Suche nach Gesetzen, Paragrafen oder Rechtsprechung..."
+          placeholder={t('placeholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pl-10"
@@ -35,7 +37,7 @@ export function SearchBar({ onSearch, isLoading, defaultValue = '' }: SearchBarP
         />
       </div>
       <Button type="submit" disabled={isLoading || !query.trim()}>
-        {isLoading ? 'Suche...' : 'Suchen'}
+        {isLoading ? t('loading') : t('button')}
       </Button>
     </form>
   );

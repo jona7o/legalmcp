@@ -1,0 +1,109 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/core",
+    "crates/embeddings",
+    "crates/ingest",
+    "crates/crawler",
+    "crates/api",
+    "bin/crawler-service",
+    "bin/seed-sources",
+    "tests/integration",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82"
+authors = ["LegalMCP Contributors"]
+license = "MIT"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0.7" }
+
+# Web framework
+axum = { version = "0.8", features = ["multipart", "macros"] }
+tower = { version = "0.5" }
+tower-http = { version = "0.6", features = ["cors", "trace", "request-id"] }
+
+# Database
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "uuid", "chrono", "json", "migrate", "macros"] }
+pgvector = { version = "0.4", features = ["sqlx", "serde"] }
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "multipart", "stream"] }
+reqwest-middleware = { version = "0.3" }
+reqwest-retry = { version = "0.6" }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }
+
+# Error handling
+thiserror = { version = "2" }
+anyhow = { version = "1" }
+
+# Logging / tracing
+tracing = { version = "0.1" }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Configuration
+config = { version = "0.14" }
+dotenvy = { version = "0.15" }
+
+# Identifiers & time
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# Crypto
+sha2 = { version = "0.10" }
+hex = { version = "0.4" }
+base64 = { version = "0.22" }
+
+# Async utilities
+async-trait = { version = "0.1" }
+futures = { version = "0.3" }
+bytes = { version = "1" }
+
+# HTML parsing
+scraper = { version = "0.22" }
+htmd = { version = "0.5" }
+
+# XML parsing
+quick-xml = { version = "0.37", features = ["serialize"] }
+
+# Text splitting
+text-splitter = { version = "0.17", features = ["tiktoken-rs"] }
+tiktoken-rs = { version = "0.5" }
+
+# Object storage
+object_store = { version = "0.11", features = ["gcp", "azure"] }
+
+# Rate limiting
+governor = { version = "0.7", features = ["std", "dashmap"] }
+
+# Job queue (postgres support is built-in via apalis-sql, no separate feature flag in 1.0-rc)
+apalis = { version = "1.0.0-rc.4" }
+apalis-sql = { version = "1.0.0-rc.4" }
+
+# Scheduling
+tokio-cron-scheduler = { version = "0.13" }
+
+# Testing
+wiremock = { version = "0.6" }
+urlencoding = { version = "2" }
+
+# Internal crates
+legal-core = { path = "crates/core" }
+embeddings = { path = "crates/embeddings" }
+ingest = { path = "crates/ingest" }
+crawler = { path = "crates/crawler" }
+api = { path = "crates/api" }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

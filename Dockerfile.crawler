@@ -1,0 +1,44 @@
+# ─────────────────────────────────────────────────────────────
+# Stage 1: Build the crawler-service (and seed-sources) binary
+# ─────────────────────────────────────────────────────────────
+FROM rust:1.82-slim AS builder
+
+# Install system dependencies required for linking (OpenSSL, pkg-config)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        pkg-config \
+        libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy workspace manifests and lock file first for layer caching
+COPY Cargo.toml Cargo.lock ./
+
+# Copy all workspace members so cargo can resolve the full workspace
+COPY crates/ crates/
+COPY bin/ bin/
+
+# Build both crawler-service and seed-sources binaries in release mode.
+# Building both in the same RUN command reuses the shared crate compilation.
+# --locked ensures we use the exact versions from Cargo.lock.
+RUN cargo build --release --locked --bin crawler-service --bin seed-sources
+
+# ─────────────────────────────────────────────────────────────
+# Stage 2: Minimal runtime image
+# ─────────────────────────────────────────────────────────────
+FROM debian:bookworm-slim
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy both compiled binaries from the builder stage
+COPY --from=builder /app/target/release/crawler-service /app/crawler-service
+COPY --from=builder /app/target/release/seed-sources /app/seed-sources
+
+CMD ["/app/crawler-service"]

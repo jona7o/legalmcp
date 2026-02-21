@@ -1,0 +1,104 @@
+{
+  "metadata": {
+    "title": "Legal MCP - Semantic Search for German and EU Law",
+    "description": "Search German federal laws, Bavarian state law and EU regulations with AI-powered semantic search."
+  },
+  "header": {
+    "search": "Search",
+    "aiAssistant": "AI Assistant",
+    "changes": "Changes",
+    "toggleTheme": "Toggle theme"
+  },
+  "footer": {
+    "tagline": "Semantic search for German and EU law",
+    "legalNotices": "Legal Notices",
+    "legalNoticesText": "The information on this platform is for informational purposes only and does not constitute legal advice.",
+    "disclaimer": "Disclaimer",
+    "disclaimerText": "Despite careful content review, we assume no liability for the accuracy, completeness and timeliness of the information provided.",
+    "copyright": "© 2026 Legal MCP. All rights reserved.",
+    "noAdvice": "No legal advice • No guarantee of accuracy and completeness"
+  },
+  "home": {
+    "title": "Legal MCP",
+    "subtitle": "Semantic search for German and EU law",
+    "federalLaw": "Federal Law",
+    "federalLawDesc": "Search German federal statutes and regulations",
+    "euLaw": "EU Law",
+    "euLawDesc": "Search EU regulations and directives",
+    "frenchLaw": "Legifrance (FR)",
+    "frenchLawDesc": "French statutes and regulations",
+    "italianLaw": "Normattiva (IT)",
+    "italianLawDesc": "Italian legal norms and statutes",
+    "spanishLaw": "BOE (ES)",
+    "spanishLawDesc": "Spanish legal provisions"
+  },
+  "search": {
+    "placeholder": "Search statutes, sections or case law...",
+    "button": "Search",
+    "loading": "Searching...",
+    "noResults": "No results found. Try different search terms.",
+    "error": "Error",
+    "unknownError": "An unknown error occurred"
+  },
+  "filter": {
+    "title": "Filters",
+    "jurisdictions": "Jurisdictions",
+    "docTypes": "Document Types",
+    "de": "Germany (Federal)",
+    "eu": "European Union",
+    "fr": "France (Legifrance)",
+    "it": "Italy (Normattiva)",
+    "es": "Spain (BOE)",
+    "statute": "Statutes",
+    "regulation": "Regulations",
+    "case": "Case Law",
+    "directive": "Directives"
+  },
+  "result": {
+    "score": "Relevance",
+    "source": "Source",
+    "statute": "Statute",
+    "regulation": "Regulation",
+    "case": "Case",
+    "directive": "Directive"
+  },
+  "changes": {
+    "title": "Recent Changes",
+    "subtitle": "Overview of recently changed laws and regulations",
+    "all": "All",
+    "de": "Germany",
+    "eu": "EU",
+    "fr": "FR",
+    "it": "IT",
+    "es": "ES",
+    "changedOn": "Changed on",
+    "noChanges": "No changes found.",
+    "loadError": "Error loading changes"
+  },
+  "law": {
+    "backToSearch": "Back to search",
+    "summary": "AI Summary",
+    "fullText": "Full Text",
+    "publishedAt": "Published",
+    "source": "Source",
+    "originalSource": "View original source",
+    "disclaimer": "Note: The legal texts displayed are for informational purposes only and do not constitute binding advice. For legally binding information, please contact the competent authorities or a lawyer."
+  },
+  "chat": {
+    "title": "Legal AI Assistant",
+    "subtitle": "Powered by Gemini 2.5 Pro with Retrieval Augmented Generation over German and EU legal sources"
+  },
+  "errors": {
+    "occurred": "An error occurred",
+    "unexpected": "An unexpected error occurred.",
+    "retry": "Try again",
+    "notFound": "Page not found",
+    "notFoundDesc": "The page you are looking for does not exist or has been moved.",
+    "backHome": "Back to home",
+    "networkError": "Network error",
+    "networkErrorDesc": "Could not connect to the server."
+  },
+  "loading": {
+    "text": "Loading..."
+  }
+}

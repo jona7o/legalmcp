@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO documents (\n            id, source_id, external_id, url, title,\n            content_md, doc_type, jurisdiction, language,\n            content_hash, object_key, metadata_json\n        ) VALUES (\n            $1, $2, $3, '', $4,\n            '', 'upload', 'UPLOAD', 'und',\n            $5, $6, '{}'::jsonb\n        )\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b79651b8d02615795ebabbf96877c2431bfc91c20ce9fbf81fcb561f70c43c44"
+}

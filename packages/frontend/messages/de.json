@@ -1,0 +1,104 @@
+{
+  "metadata": {
+    "title": "Legal MCP - Semantische Suche für deutsches und EU-Recht",
+    "description": "Durchsuchen Sie deutsche Gesetze, bayerisches Landesrecht und EU-Verordnungen mit KI-gestützter semantischer Suche."
+  },
+  "header": {
+    "search": "Suche",
+    "aiAssistant": "AI Assistent",
+    "changes": "Änderungen",
+    "toggleTheme": "Theme umschalten"
+  },
+  "footer": {
+    "tagline": "Semantische Suche für deutsches und EU-Recht",
+    "legalNotices": "Rechtliche Hinweise",
+    "legalNoticesText": "Die Informationen auf dieser Plattform dienen ausschließlich zu Informationszwecken und stellen keine Rechtsberatung dar.",
+    "disclaimer": "Haftungsausschluss",
+    "disclaimerText": "Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Richtigkeit, Vollständigkeit und Aktualität der bereitgestellten Informationen.",
+    "copyright": "© 2026 Legal MCP. Alle Rechte vorbehalten.",
+    "noAdvice": "Keine Rechtsberatung • Keine Gewähr für Aktualität und Vollständigkeit"
+  },
+  "home": {
+    "title": "Legal MCP",
+    "subtitle": "Semantische Suche für deutsches und EU-Recht",
+    "federalLaw": "Bundesrecht",
+    "federalLawDesc": "Durchsuchen Sie deutsche Bundesgesetze und Verordnungen",
+    "euLaw": "EU-Recht",
+    "euLawDesc": "EU-Verordnungen und Richtlinien durchsuchen",
+    "frenchLaw": "Legifrance (FR)",
+    "frenchLawDesc": "Französische Gesetze und Verordnungen",
+    "italianLaw": "Normattiva (IT)",
+    "italianLawDesc": "Italienische Rechtsnormen und Gesetze",
+    "spanishLaw": "BOE (ES)",
+    "spanishLawDesc": "Spanische Rechtsvorschriften"
+  },
+  "search": {
+    "placeholder": "Suche nach Gesetzen, Paragrafen oder Rechtsprechung...",
+    "button": "Suchen",
+    "loading": "Suche...",
+    "noResults": "Keine Ergebnisse gefunden. Versuchen Sie andere Suchbegriffe.",
+    "error": "Fehler",
+    "unknownError": "Ein unbekannter Fehler ist aufgetreten"
+  },
+  "filter": {
+    "title": "Filter",
+    "jurisdictions": "Rechtsgebiete",
+    "docTypes": "Dokumenttypen",
+    "de": "Deutschland (Bundesrecht)",
+    "eu": "Europäische Union",
+    "fr": "Frankreich (Legifrance)",
+    "it": "Italien (Normattiva)",
+    "es": "Spanien (BOE)",
+    "statute": "Gesetze",
+    "regulation": "Verordnungen",
+    "case": "Rechtsprechung",
+    "directive": "Richtlinien"
+  },
+  "result": {
+    "score": "Relevanz",
+    "source": "Quelle",
+    "statute": "Gesetz",
+    "regulation": "Verordnung",
+    "case": "Urteil",
+    "directive": "Richtlinie"
+  },
+  "changes": {
+    "title": "Aktuelle Änderungen",
+    "subtitle": "Übersicht über kürzlich geänderte Gesetze und Verordnungen",
+    "all": "Alle",
+    "de": "Deutschland",
+    "eu": "EU",
+    "fr": "FR",
+    "it": "IT",
+    "es": "ES",
+    "changedOn": "Geändert am",
+    "noChanges": "Keine Änderungen gefunden.",
+    "loadError": "Fehler beim Laden der Änderungen"
+  },
+  "law": {
+    "backToSearch": "Zurück zur Suche",
+    "summary": "KI-Zusammenfassung",
+    "fullText": "Volltext",
+    "publishedAt": "Veröffentlicht",
+    "source": "Quelle",
+    "originalSource": "Originalquelle ansehen",
+    "disclaimer": "Hinweis: Die dargestellten Rechtstexte dienen ausschließlich der Information und stellen keine verbindliche Auskunft dar. Für rechtsverbindliche Auskünfte wenden Sie sich bitte an die zuständigen Behörden oder einen Rechtsanwalt."
+  },
+  "chat": {
+    "title": "Legal AI Assistent",
+    "subtitle": "Powered by Gemini 2.5 Pro mit Retrieval Augmented Generation über deutsche und EU-Rechtsquellen"
+  },
+  "errors": {
+    "occurred": "Ein Fehler ist aufgetreten",
+    "unexpected": "Es ist ein unerwarteter Fehler aufgetreten.",
+    "retry": "Erneut versuchen",
+    "notFound": "Seite nicht gefunden",
+    "notFoundDesc": "Die von Ihnen gesuchte Seite existiert nicht oder wurde verschoben.",
+    "backHome": "Zurück zur Startseite",
+    "networkError": "Netzwerkfehler",
+    "networkErrorDesc": "Die Verbindung zum Server konnte nicht hergestellt werden."
+  },
+  "loading": {
+    "text": "Laden..."
+  }
+}

@@ -1,0 +1,28 @@
+[package]
+name = "integration-tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[test]]
+name = "api"
+path = "src/api.rs"
+
+[[test]]
+name = "mcp"
+path = "src/mcp.rs"
+
+[[test]]
+name = "security"
+path = "src/security.rs"
+
+[dependencies]
+tokio = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+dotenvy = { workspace = true }
+sqlx = { workspace = true }
+urlencoding = { workspace = true }

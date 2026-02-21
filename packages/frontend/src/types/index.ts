@@ -1,92 +1,109 @@
+// ─── Search ──────────────────────────────────────────────────────────────────
+
 export interface SearchResult {
-  id: string;
-  type: 'law' | 'case';
+  chunk_id: string;
+  document_id: string;
   title: string;
+  url: string;
+  jurisdiction: string;
+  doc_type: DocType;
+  language: string;
   snippet: string;
-  jurisdiction: 'BY' | 'DE' | 'EU';
   score: number;
-  metadata?: {
-    abbreviation?: string;
-    date?: string;
-    court?: string;
-    fileNumber?: string;
-  };
+  published_at: string | null;
+  source_name: string;
 }
 
+export type DocType = 'statute' | 'regulation' | 'case' | 'directive';
+
 export interface SearchParams {
-  query: string;
-  jurisdictions?: string[];
-  includeCases?: boolean;
-  documentType?: string;
+  q: string;
+  jurisdiction?: string;
+  doc_type?: DocType;
+  language?: string;
   limit?: number;
   offset?: number;
 }
 
-export interface LawDocument {
+export interface SearchResponse {
+  results: SearchResult[];
+  total: number;
+  limit: number;
+  offset: number;
+  query_embedding_ms?: number;
+  search_ms?: number;
+}
+
+// ─── Documents ───────────────────────────────────────────────────────────────
+
+export interface Document {
   id: string;
+  external_id: string;
   title: string;
-  abbreviation: string;
-  jurisdiction: 'BY' | 'DE' | 'EU';
-  content: string;
-  sections: Section[];
-  metadata: {
-    promulgationDate?: string;
-    lastModified?: string;
-    citation?: string;
-    url?: string;
-  };
+  url: string;
+  content_md: string;
+  summary: string | null;
+  doc_type: DocType;
+  jurisdiction: string;
+  language: string;
+  published_at: string | null;
+  source_id: string;
+  source_name?: string;
 }
 
-export interface Section {
+export interface DocumentVersion {
   id: string;
-  number: string;
-  title: string;
-  content: string;
-  subsections?: Section[];
+  document_id: string;
+  version_number: number;
+  content_hash: string;
+  changed_at: string;
+  change_summary: string | null;
 }
 
-export interface CaseDocument {
+// ─── Sources ─────────────────────────────────────────────────────────────────
+
+export interface Source {
   id: string;
-  title: string;
-  court: string;
-  fileNumber: string;
-  date: string;
-  jurisdiction: 'BY' | 'DE' | 'EU';
-  summary: string;
-  fullText: string;
-  headnotes?: string[];
-  references?: Reference[];
-  metadata: {
-    ecli?: string;
-    citation?: string;
-    url?: string;
-  };
+  name: string;
+  jurisdiction: string;
+  language: string;
+  base_url: string;
+  crawler_type: string;
+  cron_schedule: string;
+  enabled: boolean;
 }
 
-export interface Reference {
-  type: 'law' | 'case';
-  id: string;
-  citation: string;
-  context?: string;
+// ─── Changes ─────────────────────────────────────────────────────────────────
+
+export interface ChangesParams {
+  since?: string;
+  jurisdiction?: string;
+  limit?: number;
+  offset?: number;
 }
 
-export interface Change {
-  id: string;
-  lawId: string;
-  lawTitle: string;
-  changeDate: string;
-  description: string;
-  affectedSections: string[];
-  jurisdiction: 'BY' | 'DE' | 'EU';
+export interface ChangesResponse {
+  results: DocumentVersion[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
+// ─── Errors ──────────────────────────────────────────────────────────────────
+
+/** RFC 7807 Problem Details */
 export interface ApiError {
-  error: string;
-  details?: string;
+  type?: string;
+  title?: string;
   status: number;
+  detail?: string;
+  /** Legacy compat fields */
+  error?: string;
+  details?: string;
 }
 
-// Chat interface types
+// ─── Chat (deferred — no new endpoint) ───────────────────────────────────────
+
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -95,7 +112,7 @@ export interface ChatMessage {
 
 export interface ChatSource {
   title: string;
-  jurisdiction: 'BY' | 'DE' | 'EU';
+  jurisdiction: string;
   content: string;
   metadata?: {
     abbreviation?: string;
